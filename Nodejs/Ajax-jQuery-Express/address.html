@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <div class="continer">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <h3>选择收址</h3>
+          <div class="row">
+            <div class="col-md-4">
+              <select class="form-control" id="provinces">
+                <option>请选择省</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <select class="form-control" id="cities">
+                <option>请选择市</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <select class="form-control" id="counties">
+                <option>请选择县/区</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+      // Ajax 请求省的数据
+      $.get("/get_provinces", provincesData => {
+        provincesData = JSON.parse(provincesData);
+        for (let i = 0; i < provincesData.length; i++) {
+          $("#provinces").append("<option>" + provincesData[i] + "</option>");
+        }
+      });
+      // 省改变触发事件
+      $("#provinces").change(() => {
+        $("#cities").html("<option>请选择市</option>");
+        $("#counties").html("<option>请选择县/区</option>");
+        let selectProvince = $("#provinces").val();
+        // Ajax 请求市的数据
+        $.get("/get_cities", { provinces: selectProvince }, citiesData => {
+          citiesData = JSON.parse(citiesData);
+          for (let i = 0; i < citiesData.length; i++) {
+            $("#cities").append("<option>" + citiesData[i] + "</option>");
+          }
+        });
+      });
+      // 市改变触发事件
+      $("#cities").change(() => {
+        $("#counties").html("<option>请选择县/区</option>");
+        let selectProvince = $("#provinces").val();
+        let selectCity = $("#cities").val();
+        // Ajax 请求县的数据
+        $.get(
+          "/get_counties",
+          {
+            selectProvince: selectProvince,
+            selectCity: selectCity
+          },
+          countiesData => {
+            countiesData = JSON.parse(countiesData);
+            for (let i = 0; i < countiesData.length; i++) {
+              $("#counties").append("<option>" + countiesData[i] + "</option>");
+            }
+          }
+        );
+      });
+    </script>
+  </body>
+</html>
